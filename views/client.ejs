@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .username {
+            width: 10%;
+        }
+        .button {
+            width: 10%;
+        }
+        .message {
+            width: 40%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <textarea class="chatLog" name="chatLog" readonly id="chatLog" cols="130" rows="40"></textarea>
+        <form id="chat" class="handleMessage">
+            <input type="text" id="username" readonly class="username" />
+            <input type="text" class="message" id="message" placeholder="send message..." />
+            <button type="submit" class="button" id="button">submit</button>
+        </form>
+    </div>
+    <script src="/socket.io/socket.io.js"></script> 
+    <!-- socket.io을 import 해줍니다. -->
+    <script src="//code.jquery.com/jquery-1.11.1.js"></script>
+    <!-- jquery를 import 해줍니다. -->
+    <script>
+        var socket = io();
+        // import한 io를 활성화시켜줍니다. 
+        // 그럼 이때부터 서버와 양방향 통신을 하게됩니다. 
+        $('#chat').on('submit', (e) => {    //chat 에 submit 작업이 발생할때마다
+            socket.emit('send message', $('#username').val(), $('#message').val());
+            //send message 라는 이름으로, server에게 username, message 순서대로 매개변수를 넘겨줍니다. 
+            $('#message').val("");
+            //message 창을 비워주고,
+            $('#message').focus();
+            //메시지창에 포커스를 계속 맞춰줍니다. 
+            e.preventDefault();
+            //e.preventDefault() 함수는 form 태그에서 submit 함수가 작동할때 기본적으로 발생하는 모든
+            //액션들을 취소해주는 역할을 합니다. 
+        })
+
+        socket.on('receive message', (msg) => {
+            //receive message 라는 이름의 event가 발생할시, 첫번째로 오는 매개변수를 msg로 받아줍니다. 
+            $('#chatLog').append(msg+ "\n");
+            $("#chatLog").scrollTop($("#chatLog")[0].scrollHeight);
+        })
+
+        socket.on('change name', (name) => {
+            //change name이라는 이름의 event가 발생할시, 첫번째로 오는 매개변수를 name으로 받아줍니다. 
+            console.log(name);
+            $("#username").val(name);
+        })
+    </script>
+</body>
+</html>
